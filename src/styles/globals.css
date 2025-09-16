@@ -55,72 +55,69 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
+
+  /* Core colors */
+  --background: oklch(0.99 0.002 120);
+  /* off-white */
+  --foreground: oklch(0.18 0.01 260);
+  /* dark gray text */
+  --primary: #73BE46;
+  --primary-foreground: oklch(0.99 0 0);
+  /* white text on green */
   --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
+  /* subtle gray */
+  --secondary-foreground: oklch(0.18 0.01 260);
+
+  /* UI elements */
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.18 0.01 260);
+  --border: oklch(0.92 0.01 260);
+  --input: oklch(0.96 0.01 260);
+  --ring: #73BE46;
+
+  /* Muted/Accents */
   --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
+  --muted-foreground: oklch(0.55 0.01 260);
+  --accent: #E6F4E8;
+  /* light green background hover */
+  --accent-foreground: #73BE46;
+
+  /* Feedback */
+  --destructive: oklch(0.55 0.25 25);
+  --destructive-foreground: oklch(0.99 0 0);
+
+  /* Sidebar/Footer */
   --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar-foreground: oklch(0.18 0.01 260);
+  --sidebar-primary: #73BE46;
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-border: oklch(0.92 0.01 260);
+  --sidebar-ring: #73BE46;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: oklch(0.18 0.01 260);
+  --foreground: oklch(0.99 0 0);
+  --card: oklch(0.25 0.01 260);
+  --card-foreground: oklch(0.99 0 0);
+  --primary: #73BE46;
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.3 0.01 260);
+  --secondary-foreground: oklch(0.99 0 0);
+  --muted: oklch(0.3 0.01 260);
+  --muted-foreground: oklch(0.72 0.01 260);
+  --accent: #2B3D28;
+  /* dark muted green */
+  --accent-foreground: #73BE46;
+  --border: oklch(0.35 0.01 260);
+  --input: oklch(0.3 0.01 260);
+  --ring: #73BE46;
+  --sidebar: oklch(0.25 0.01 260);
+  --sidebar-foreground: oklch(0.99 0 0);
+  --sidebar-primary: #73BE46;
+  --sidebar-primary-foreground: oklch(0.99 0 0);
 }
+
 
 @layer base {
   * {
@@ -128,6 +125,6 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-body;
   }
 }

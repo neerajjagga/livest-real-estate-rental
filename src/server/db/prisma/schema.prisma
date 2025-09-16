@@ -7,16 +7,83 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  Tenant
+  Manager
+}
+
+enum Highlight {
+  HighSpeedInternetAccess
+  WasherDryer
+  AirConditioning
+  Heating
+  SmokeFree
+  CableReady
+  SatelliteTV
+  DoubleVanities
+  TubShower
+  Intercom
+  SprinklerSystem
+  RecentlyRenovated
+  CloseToTransit
+  GreatView
+  QuietNeighborhood
+}
+
+enum Amenity {
+  WasherDryer
+  AirConditioning
+  Dishwasher
+  HighSpeedInternet
+  HardwoodFloors
+  WalkInClosets
+  Microwave
+  Refrigerator
+  Pool
+  Gym
+  Parking
+  PetsAllowed
+  WiFi
+}
+
+enum PropertyType {
+  Rooms
+  Tinyhouse
+  Apartment
+  Villa
+  Townhouse
+  Cottage
+}
+
+enum ApplicationStatus {
+  Pending
+  Denied
+  Approved
+}
+
+enum PaymentStatus {
+  Pending
+  Paid
+  PartiallyPaid
+  Overdue
+}
+
+// ---------- User Related
 model User {
-  id            String    @id
+  id            String        @id
   name          String
   email         String
-  emailVerified Boolean   @default(false)
+  role          UserRole      @default(Tenant)
+  emailVerified Boolean       @default(false)
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @default(now()) @updatedAt
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @default(now()) @updatedAt
   sessions      Session[]
   accounts      Account[]
+  applications  Application[]
+  properties    Property[]
+  leases        Lease[]
+  favorites     Property[]    @relation("TenantFavorites")
 
   @@unique([email])
   @@map("user")
@@ -65,4 +132,112 @@ model Verification {
   updatedAt  DateTime @default(now()) @updatedAt
 
   @@map("verification")
+}
+
+// ---------- Property related
+
+model Property {
+  id                Int          @id
+  name              String
+  description       String
+  pricePerMonth     Float
+  securityDeposit   Float
+  applicationFee    Float
+  photoUrls         String[]
+  amenities         Amenity[]
+  highlights        Highlight[]
+  isPetsAllowed     Boolean      @default(false)
+  isParkingIncluded Boolean      @default(false)
+  beds              Int
+  baths             Float
+  squareFeet        Int
+  propertyType      PropertyType
+  postedDate        DateTime     @default(now())
+  averageRating     Float?       @default(0)
+  numberOfReviews   Int?         @default(0)
+  locationId        Int
+  managerId         String
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  location     Location      @relation(fields: [locationId], references: [id])
+  manager      User          @relation(fields: [managerId], references: [id])
+  leases       Lease[]
+  applications Application[]
+  favoritedBy  User[]        @relation("TenantFavorites")
+
+  @@map("property")
+}
+
+model Location {
+  id          Int                                   @id
+  address     String
+  city        String
+  state       String
+  country     String
+  postalCode  String
+  coordinates Unsupported("geography(Point, 4326)")
+  createdAt   DateTime                              @default(now())
+  updatedAt   DateTime                              @updatedAt
+
+  properties Property[]
+
+  @@map("location")
+}
+
+model Lease {
+  id         Int      @id
+  startDate  DateTime
+  endDate    DateTime
+  rent       Float
+  deposit    Float
+  propertyId Int
+  tenantId   String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  property    Property     @relation(fields: [propertyId], references: [id])
+  tenant      User         @relation(fields: [tenantId], references: [id])
+  application Application?
+  payments    Payment[]
+
+  @@map("lease")
+}
+
+model Application {
+  id              Int               @id
+  applicationDate DateTime
+  status          ApplicationStatus
+  propertyId      Int
+  tenantId        String
+  name            String
+  email           String
+  phoneNumber     String
+  message         String?
+  leaseId         Int?              @unique
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  property Property @relation(fields: [propertyId], references: [id])
+  tenant   User     @relation(fields: [tenantId], references: [id])
+  lease    Lease?   @relation(fields: [leaseId], references: [id])
+
+  @@map("application")
+}
+
+model Payment {
+  id            Int           @id
+  amountDue     Float
+  amountPaid    Float
+  dueDate       DateTime
+  paymentDate   DateTime
+  paymentStatus PaymentStatus
+  leaseId       Int
+
+  lease Lease @relation(fields: [leaseId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("payment")
 }
