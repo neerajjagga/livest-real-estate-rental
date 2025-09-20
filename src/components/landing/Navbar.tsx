@@ -8,6 +8,7 @@ import { signOut, useSession } from "@/lib/auth/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, LogOut } from "lucide-react";
+import ProfileDropdown from "./ProfileDropdown";
 
 export default function Navbar() {
     const router = useRouter();
@@ -15,7 +16,7 @@ export default function Navbar() {
 
     if (isPending) {
         return (
-            <div className="fixed top-0 left-0 right-0 z-50 backdrop-blur-lg bg-white/5 border-b border-white/20">
+            <div className="fixed top-0 left-0 right-0 z-50 bg-[#27262b]">
                 <div className="container mx-auto px-4 md:px-6 py-3 md:py-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -41,7 +42,7 @@ export default function Navbar() {
     }
 
     return (
-        <div className="fixed top-0 left-0 right-0 z-50 backdrop-blur-lg bg-white/5 border-b border-white/20">
+        <div className="fixed top-0 left-0 right-0 z-50 bg-[#27262b]">
             <div className="container mx-auto px-4 md:px-6 py-3 md:py-4">
                 <div className="flex items-center justify-between">
                     {/* logo */}
@@ -50,9 +51,9 @@ export default function Navbar() {
                             <Image
                                 src="/logo.svg"
                                 alt="Logo"
-                                width={36}
-                                height={36}
-                                className="w-[26px] h-[26px] md:w-[36px] md:h-[36px]"
+                                width={34}
+                                height={34}
+                                className="w-[26px] h-[26px] md:w-[34px] md:h-[34px]"
                             />
                             <h1 className="font-logo text-white text-2xl md:text-3xl">livest</h1>
                         </Link>
@@ -89,7 +90,8 @@ export default function Navbar() {
                             <>
                                 {/* Desktop Navigation */}
                                 <div className="hidden md:flex items-center gap-5">
-                                    <div className="flex items-center gap-2">
+                                    <ProfileDropdown />
+                                    {/* <div className="flex items-center gap-2">
                                         <div className="h-8 w-8 rounded-full bg-primary/50 flex items-center justify-center">
                                             <span className="text-white font-medium">
                                                 {session.user.name?.[0]?.toUpperCase() || "U"}
@@ -98,12 +100,12 @@ export default function Navbar() {
                                         <span className="text-white font-medium">
                                             {session.user.name}
                                         </span>
-                                    </div>
-                                    <Button
+                                    </div> */}
+                                    {/* <Button
                                         onClick={() => router.push('/dashboard')}
                                     >
                                         Dashboard
-                                    </Button>
+                                    </Button> */}
                                     {session.user.role === 'Manager' && (
                                         <Button
                                             variant="ghost"
