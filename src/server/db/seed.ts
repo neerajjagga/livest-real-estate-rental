@@ -3,6 +3,7 @@
 import { PrismaClient } from "@prisma/client";
 import fs from "fs";
 import path from "path";
+import crypto from "crypto";
 
 const prisma = new PrismaClient();
 
@@ -19,49 +20,38 @@ function toCamelCase(str: string): string {
 }
 
 async function insertLocationData(locations: any[]) {
+  const createdLocations: any[] = [];
   for (const location of locations) {
-    const { id, country, city, state, address, postalCode, coordinates } =
-      location;
+    const { country, city, state, address, postalCode, coordinates } = location;
     try {
+      // Generate a UUID for the location
+      const locationId = crypto.randomUUID();
+      
       await prisma.$executeRaw`
         INSERT INTO "location" ("id", "country", "city", "state", "address", "postalCode", "coordinates", "createdAt", "updatedAt") 
-        VALUES (${id}, ${country}, ${city}, ${state}, ${address}, ${postalCode}, ST_GeomFromText(${coordinates}, 4326), NOW(), NOW());
+        VALUES (${locationId}, ${country}, ${city}, ${state}, ${address}, ${postalCode}, ST_GeomFromText(${coordinates}, 4326), NOW(), NOW());
       `;
+      
+      // Fetch the created location to return it
+      const createdLocation = await prisma.location.findUnique({
+        where: { id: locationId }
+      });
+      
+      if (createdLocation) {
+        createdLocations.push(createdLocation);
+      }
       console.log(`Inserted location for ${city}`);
     } catch (error) {
       console.error(`Error inserting location for ${city}:`, error);
     }
   }
+  return createdLocations;
 }
 
 async function resetSequence(modelName: string) {
-  // Map model names to their actual table names
-  const tableNameMap: { [key: string]: string } = {
-    'Location': 'location',
-    'User': 'user',
-    'Property': 'property',
-    'Lease': 'lease',
-    'Application': 'application',
-    'Payment': 'payment'
-  };
-  
-  const quotedModelName = `"${tableNameMap[modelName] || modelName.toLowerCase()}"`;
-
-  const maxIdResult = await (
-    prisma[toCamelCase(modelName) as keyof PrismaClient] as any
-  ).findMany({
-    select: { id: true },
-    orderBy: { id: "desc" },
-    take: 1,
-  });
-
-  if (maxIdResult.length === 0) return;
-
-  const nextId = maxIdResult[0].id + 1;
-  await prisma.$executeRaw`
-    SELECT setval(pg_get_serial_sequence(${quotedModelName}, 'id'), ${nextId}, false);
-  `;
-  console.log(`Reset sequence for ${modelName} to ${nextId}`);
+  // Since we're using UUID primary keys, we don't need to reset sequences
+  // UUID generation is handled automatically by Prisma
+  console.log(`Skipping sequence reset for ${modelName} (using UUID primary keys)`);
 }
 
 async function deleteAllData(orderedFileNames: string[]) {
@@ -100,6 +90,9 @@ async function main() {
   // Delete all existing data
   await deleteAllData(orderedFileNames);
 
+  // Store created records to reference their UUIDs
+  const createdRecords: { [key: string]: any[] } = {};
+
   // Seed data
   for (const fileName of orderedFileNames) {
     const filePath = path.join(dataDirectory, fileName);
@@ -118,7 +111,8 @@ async function main() {
     const modelNameCamel = toCamelCase(modelName);
 
     if (modelName === "Location") {
-      await insertLocationData(jsonData);
+      const locations = await insertLocationData(jsonData);
+      createdRecords['Location'] = locations;
     } else {
       const model = (prisma as any)[modelNameCamel];
       if (!model) {
@@ -128,11 +122,80 @@ async function main() {
       
       try {
         console.log(`Seeding ${jsonData.length} items for ${modelName}`);
-        for (const item of jsonData) {
-          await model.create({
+        const createdItems = [];
+        for (let i = 0; i < jsonData.length; i++) {
+          const item = { ...jsonData[i] };
+          
+          // For User model, keep the ID if it's already a UUID string, otherwise remove it
+          if (modelName === 'User') {
+            if (typeof item.id !== 'string' || !item.id.includes('-')) {
+              delete item.id;
+            }
+          } else {
+            // Remove the id field since UUIDs are auto-generated
+            delete item.id;
+          }
+          
+          // Map foreign key references to actual UUIDs
+          if (item.locationId && createdRecords['Location']) {
+            const locationIndex = item.locationId - 1; // Convert 1-based to 0-based index
+            if (createdRecords['Location'][locationIndex]) {
+              item.locationId = createdRecords['Location'][locationIndex].id;
+            }
+          }
+          
+          if (item.managerId && createdRecords['User']) {
+            // If managerId is already a UUID string, find the user with that ID
+            if (typeof item.managerId === 'string' && item.managerId.includes('-')) {
+              const manager = createdRecords['User'].find(u => u.id === item.managerId);
+              if (manager) {
+                item.managerId = manager.id;
+              }
+            } else {
+              // Find manager by role
+              const manager = createdRecords['User'].find(u => u.role === 'Manager');
+              if (manager) {
+                item.managerId = manager.id;
+              }
+            }
+          }
+          
+          if (item.propertyId && createdRecords['Property']) {
+            const propertyIndex = item.propertyId - 1;
+            if (createdRecords['Property'][propertyIndex]) {
+              item.propertyId = createdRecords['Property'][propertyIndex].id;
+            }
+          }
+          
+          if (item.tenantId && createdRecords['User']) {
+            // If tenantId is already a UUID string, find the user with that ID
+            if (typeof item.tenantId === 'string' && item.tenantId.includes('-')) {
+              const tenant = createdRecords['User'].find(u => u.id === item.tenantId);
+              if (tenant) {
+                item.tenantId = tenant.id;
+              }
+            } else {
+              // Find tenant by role
+              const tenant = createdRecords['User'].find(u => u.role === 'Tenant');
+              if (tenant) {
+                item.tenantId = tenant.id;
+              }
+            }
+          }
+          
+          if (item.leaseId && createdRecords['Lease']) {
+            const leaseIndex = item.leaseId - 1;
+            if (createdRecords['Lease'][leaseIndex]) {
+              item.leaseId = createdRecords['Lease'][leaseIndex].id;
+            }
+          }
+          
+          const createdItem = await model.create({
             data: item,
           });
+          createdItems.push(createdItem);
         }
+        createdRecords[modelName] = createdItems;
         console.log(`Seeded ${modelName} with data from ${fileName}`);
       } catch (error) {
         console.error(`Error seeding data for ${modelName}:`, error);
@@ -141,7 +204,7 @@ async function main() {
       }
     }
 
-    // Reset the sequence after seeding each model
+    // Reset the sequence after seeding each model (no-op for UUIDs)
     try {
       await resetSequence(modelName);
     } catch (error) {

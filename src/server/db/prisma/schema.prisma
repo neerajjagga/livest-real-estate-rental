@@ -5,6 +5,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 enum UserRole {
@@ -70,7 +71,7 @@ enum PaymentStatus {
 
 // ---------- User Related
 model User {
-  id            String        @id
+  id            String        @id @default(uuid())
   name          String
   email         String
   role          UserRole      @default(Tenant)
@@ -90,7 +91,7 @@ model User {
 }
 
 model Session {
-  id        String   @id
+  id        String   @id @default(uuid())
   expiresAt DateTime
   token     String
   createdAt DateTime @default(now())
@@ -105,7 +106,7 @@ model Session {
 }
 
 model Account {
-  id                    String    @id
+  id                    String    @id @default(uuid())
   accountId             String
   providerId            String
   userId                String
@@ -124,7 +125,7 @@ model Account {
 }
 
 model Verification {
-  id         String   @id
+  id         String   @id @default(uuid())
   identifier String
   value      String
   expiresAt  DateTime
@@ -137,7 +138,7 @@ model Verification {
 // ---------- Property related
 
 model Property {
-  id                Int          @id
+  id                String       @id @default(uuid())
   name              String
   description       String
   pricePerMonth     Float
@@ -155,7 +156,7 @@ model Property {
   postedDate        DateTime     @default(now())
   averageRating     Float?       @default(0)
   numberOfReviews   Int?         @default(0)
-  locationId        Int
+  locationId        String
   managerId         String
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt
@@ -170,7 +171,7 @@ model Property {
 }
 
 model Location {
-  id          Int                                   @id
+  id          String                                @id @default(uuid())
   address     String
   city        String
   state       String
@@ -186,12 +187,12 @@ model Location {
 }
 
 model Lease {
-  id         Int      @id
+  id         String   @id @default(uuid())
   startDate  DateTime
   endDate    DateTime
   rent       Float
   deposit    Float
-  propertyId Int
+  propertyId String
   tenantId   String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -205,16 +206,16 @@ model Lease {
 }
 
 model Application {
-  id              Int               @id
+  id              String            @id @default(uuid())
   applicationDate DateTime
   status          ApplicationStatus
-  propertyId      Int
+  propertyId      String
   tenantId        String
   name            String
   email           String
   phoneNumber     String
   message         String?
-  leaseId         Int?              @unique
+  leaseId         String?           @unique
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
 
@@ -226,13 +227,13 @@ model Application {
 }
 
 model Payment {
-  id            Int           @id
+  id            String        @id @default(uuid())
   amountDue     Float
   amountPaid    Float
   dueDate       DateTime
   paymentDate   DateTime
   paymentStatus PaymentStatus
-  leaseId       Int
+  leaseId       String
 
   lease Lease @relation(fields: [leaseId], references: [id])
 

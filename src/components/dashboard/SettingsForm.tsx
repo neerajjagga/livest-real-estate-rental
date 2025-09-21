@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useUser } from "../UserProvider";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -14,15 +14,20 @@ interface SettingsFormData {
 
 export default function SettingsForm() {
     const { user, refetchUser } = useUser();
-    if (!user) return;
 
-    const [formData, setFormData] = useState<SettingsFormData>({
-        name: user.name || "",
-        email: user.email || ""
-    });
+    const [formData, setFormData] = useState<SettingsFormData>({ name: "", email: "" });
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (user) {
+            setFormData({ name: user.name, email: user.email });
+        }
+    }, [user]);
+
+    if (!user) return <div>Loading user...</div>;
+
     const isDisabled =
         (formData.name.trim() === user.name && formData.email.trim() === user.email) ||
         isLoading;
