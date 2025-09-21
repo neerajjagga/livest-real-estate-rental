@@ -22,8 +22,8 @@ async function insertLocationData(locations: any[]) {
       location;
     try {
       await prisma.$executeRaw`
-        INSERT INTO "Location" ("id", "country", "city", "state", "address", "postalCode", "coordinates") 
-        VALUES (${id}, ${country}, ${city}, ${state}, ${address}, ${postalCode}, ST_GeomFromText(${coordinates}, 4326));
+        INSERT INTO "location" ("id", "country", "city", "state", "address", "postalCode", "coordinates", "createdAt", "updatedAt") 
+        VALUES (${id}, ${country}, ${city}, ${state}, ${address}, ${postalCode}, ST_GeomFromText(${coordinates}, 4326), NOW(), NOW());
       `;
       console.log(`Inserted location for ${city}`);
     } catch (error) {
@@ -33,10 +33,20 @@ async function insertLocationData(locations: any[]) {
 }
 
 async function resetSequence(modelName: string) {
-  const quotedModelName = `"${toPascalCase(modelName)}"`;
+  // Map model names to their actual table names
+  const tableNameMap: { [key: string]: string } = {
+    'Location': 'location',
+    'User': 'user',
+    'Property': 'property',
+    'Lease': 'lease',
+    'Application': 'application',
+    'Payment': 'payment'
+  };
+  
+  const quotedModelName = `"${tableNameMap[modelName] || modelName.toLowerCase()}"`;
 
   const maxIdResult = await (
-    prisma[modelName as keyof PrismaClient] as any
+    prisma[toCamelCase(modelName) as keyof PrismaClient] as any
   ).findMany({
     select: { id: true },
     orderBy: { id: "desc" },
@@ -46,11 +56,9 @@ async function resetSequence(modelName: string) {
   if (maxIdResult.length === 0) return;
 
   const nextId = maxIdResult[0].id + 1;
-  await prisma.$executeRaw(
-    Prisma.raw(`
-    SELECT setval(pg_get_serial_sequence('${quotedModelName}', 'id'), coalesce(max(id)+1, ${nextId}), false) FROM ${quotedModelName};
-  `)
-  );
+  await prisma.$executeRaw`
+    SELECT setval(pg_get_serial_sequence(${quotedModelName}, 'id'), ${nextId}, false);
+  `;
   console.log(`Reset sequence for ${modelName} to ${nextId}`);
 }
 
@@ -93,6 +101,14 @@ async function main() {
   // Seed data
   for (const fileName of orderedFileNames) {
     const filePath = path.join(dataDirectory, fileName);
+    
+    // Check if file exists
+    if (!fs.existsSync(filePath)) {
+      console.error(`File not found: ${filePath}`);
+      continue;
+    }
+    
+    console.log(`Processing file: ${fileName}`);
     const jsonData = JSON.parse(fs.readFileSync(filePath, "utf-8"));
     const modelName = toPascalCase(
       path.basename(fileName, path.extname(fileName))
@@ -103,7 +119,13 @@ async function main() {
       await insertLocationData(jsonData);
     } else {
       const model = (prisma as any)[modelNameCamel];
+      if (!model) {
+        console.error(`Model ${modelNameCamel} not found in Prisma client`);
+        continue;
+      }
+      
       try {
+        console.log(`Seeding ${jsonData.length} items for ${modelName}`);
         for (const item of jsonData) {
           await model.create({
             data: item,
@@ -112,11 +134,17 @@ async function main() {
         console.log(`Seeded ${modelName} with data from ${fileName}`);
       } catch (error) {
         console.error(`Error seeding data for ${modelName}:`, error);
+        // Continue with next model instead of stopping
+        continue;
       }
     }
 
     // Reset the sequence after seeding each model
-    await resetSequence(modelName);
+    try {
+      await resetSequence(modelName);
+    } catch (error) {
+      console.error(`Error resetting sequence for ${modelName}:`, error);
+    }
 
     await sleep(1000);
   }

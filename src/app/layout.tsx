@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Ultra, Inter } from "next/font/google";
 import "../styles/globals.css";
+import { Toaster } from "sonner";
 
 const ultra = Ultra({
   variable: '--font-ultra',
@@ -45,6 +46,7 @@ export default function RootLayout({
         className={`${ultra.variable} ${inter.variable} antialiased`}
       >
         {children}
+        <Toaster />
       </body>
     </html>
   );
