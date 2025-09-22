@@ -5,15 +5,6 @@ import { Location } from "@prisma/client";
 import { propertySchema } from "@/server/validators/schemas";
 import { v4 as uuidv4 } from 'uuid'
 
- /**
- * TODO:
- * - validate managerId and validate the presence of manager user  
- * - Add more data validations to this api
- * - populate data properly when sending back to client after creating property
- *      - add coordinates in location
- *      - omit relevant fields from location, manager, property as well 
- */
-
 // create property
 export async function POST(req: NextRequest) {
     try {
@@ -38,7 +29,18 @@ export async function POST(req: NextRequest) {
             managerId,
             photoUrls,
             ...propertyData
-        }:any = result.data;
+        }: any = result.data;
+
+        // validate managerId
+        const manager = await prisma.user.findFirst({
+            where: {
+                id: managerId
+            }
+        });
+
+        if (!manager) {
+            return NextResponse.json({ success: false, message: "Manager not found" }, { status: 404 });
+        }
 
         const geoCodingUrl = `https://nominatim.openstreetmap.org/search?${new URLSearchParams({
             street: address,
@@ -94,14 +96,35 @@ export async function POST(req: NextRequest) {
                 squareFeet: parseInt(propertyData.squareFeet),
             },
             include: {
-                location: true,
-                manager: true,
+                location: {
+                    omit: {
+                        id: true,
+                        createdAt: true,
+                        updatedAt: true
+                    }
+                },
+                manager: {
+                    omit: {
+                        role: true,
+                        emailVerified: true,
+                        updatedAt: true
+                    }
+                },
             }
         });
 
         return NextResponse.json({
             success: true,
-            property: newProperty,
+            property: {
+                ...newProperty,
+                location: {
+                    ...newProperty.location,
+                    coordinates: {
+                        latitude,
+                        longitude
+                    }
+                }
+            },
             message: "Property created successfully",
         });
 

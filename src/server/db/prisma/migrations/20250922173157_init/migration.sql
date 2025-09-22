@@ -97,6 +97,7 @@ CREATE TABLE "public"."property" (
     "numberOfReviews" INTEGER DEFAULT 0,
     "locationId" TEXT NOT NULL,
     "managerId" TEXT NOT NULL,
+    "tenants" TEXT[],
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 

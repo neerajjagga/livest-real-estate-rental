@@ -5,7 +5,13 @@ import fs from "fs";
 import path from "path";
 import crypto from "crypto";
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: "postgresql://postgres:pass@localhost:5432/livest-real-estate-app"
+    }
+  }
+});
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
