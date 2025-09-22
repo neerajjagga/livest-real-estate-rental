@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Ultra, Inter } from "next/font/google";
-import "../styles/globals.css";
+import "./globals.css";
 import { Toaster } from "sonner";
+import { UserProvider } from "@/components/UserProvider";
 
 const ultra = Ultra({
   variable: '--font-ultra',
@@ -35,7 +36,7 @@ export const metadata: Metadata = {
   ],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -45,7 +46,9 @@ export default function RootLayout({
       <body
         className={`${ultra.variable} ${inter.variable} antialiased`}
       >
-        {children}
+        <UserProvider>
+          {children}
+        </UserProvider>
         <Toaster />
       </body>
     </html>

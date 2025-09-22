@@ -37,12 +37,12 @@ export default function LoginForm() {
             email: formData.email,
             password: formData.password
         }, {
-            onRequest: () => {},
-            onResponse: () => {},
-            onSuccess: () => {},
-            onError: () => {},
+            onRequest: () => { },
+            onResponse: () => { },
+            onSuccess: () => { },
+            onError: () => { },
         });
-        if(response.error) {
+        if (response.error) {
             toast.error(response.error.message);
         }
         setIsLoading(false);
@@ -151,7 +151,7 @@ export default function LoginForm() {
             </form>
 
             <div className="text-center text-sm">
-                <span className="text-muted-foreground">Don't have an account? </span>
+                <span className="text-muted-foreground">Don&apos;t have an account? </span>
                 <button
                     type="button"
                     className="text-primary hover:underline font-medium"
