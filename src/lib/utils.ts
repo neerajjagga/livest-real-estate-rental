@@ -6,6 +6,33 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export function getCurrentLocation(): Promise<GeolocationPosition> {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject(new Error("Geolocation is not supported by this browser."));
+      return;
+    }
+
+    const options: PositionOptions = {
+      enableHighAccuracy: true,
+      timeout: 10000, // 10 seconds
+      maximumAge: 300000 // 5 minutes
+    };
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        console.log('Geolocation success:', position);
+        resolve(position);
+      },
+      (error) => {
+        console.error('Geolocation error:', error);
+        reject(error);
+      },
+      options
+    );
+  });
+}
+
 // export function formatEnumString(str: string) {
 //   return str.replace(/([A-Z])/g, " $1").trim();
 // }

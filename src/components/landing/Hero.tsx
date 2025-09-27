@@ -1,9 +1,13 @@
+'use client'
 
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Search, MapPin } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 export default function Hero() {
+    const router = useRouter();
+
     return (
         <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden">
             <div className="absolute inset-0">
@@ -34,7 +38,9 @@ export default function Hero() {
                     </div>
 
                     <div className="w-full max-w-2xl backdrop-blur-md bg-white/10 border border-white/20 rounded-2xl p-1 shadow-2xl">
-                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 p-2 md:p-4">
+                        <div
+                        onClick={() => router.push('/search')} 
+                        className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 p-2 md:p-4">
                             <div className="flex items-center gap-3 flex-1 min-w-0">
                                 <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-white/70 flex-shrink-0" />
                                 <input

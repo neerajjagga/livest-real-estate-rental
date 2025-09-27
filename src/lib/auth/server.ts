@@ -32,6 +32,12 @@ export const auth = betterAuth({
                 input: true,
                 defaultValue: "Tenant",
             },
+        },
+        select: {
+            id: true,
+            email: true,
+            image: true,
+            role: true
         }
     },
     advanced: {
