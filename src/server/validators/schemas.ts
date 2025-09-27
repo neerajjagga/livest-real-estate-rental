@@ -1,5 +1,5 @@
 import * as z from "zod";
-import { PropertyType } from "@prisma/client";
+import { ApplicationStatus, PropertyType } from "@prisma/client";
 
 const propertyTypeValues = Object.values(PropertyType) as [PropertyType, ...PropertyType[]];
 
@@ -27,6 +27,22 @@ export const propertySchema = z.object({
 });
 
 export type PropertyFormData = z.infer<typeof propertySchema>;
+
+export const createApplicationSchema = z.object({
+  applicationDate: z.preprocess(
+    (arg) => (typeof arg === "string" ? new Date(arg) : arg),
+    z.date()
+  ),
+  propertyId: z.string().min(1, "Property ID is required"),
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Invalid email address"),
+  phoneNumber: z.string().regex(/^[0-9]{10}$/, "Invalid phone number"),
+  message: z.string().max(500).optional()
+});
+
+export const updateApplicationSchema = z.object({
+  status: z.nativeEnum(ApplicationStatus)
+});
 
 export const applicationSchema = z.object({
   name: z.string().min(1, "Name is required"),

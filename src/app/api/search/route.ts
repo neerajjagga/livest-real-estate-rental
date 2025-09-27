@@ -23,11 +23,11 @@ export async function GET(req: NextRequest) {
         const conditions: Prisma.Sql[] = [];
 
         if (priceMin) {
-            conditions.push(Prisma.sql`p."priceMin" >= ${Number(priceMin)}`);
+            conditions.push(Prisma.sql`p."pricePerMonth" >= ${Number(priceMin)}`);
         }
 
         if (priceMax) {
-            conditions.push(Prisma.sql`p."priceMax" <= ${Number(priceMax)}`);
+            conditions.push(Prisma.sql`p."pricePerMonth" <= ${Number(priceMax)}`);
         }
 
         if (beds) {
@@ -39,11 +39,11 @@ export async function GET(req: NextRequest) {
         }
 
         if (squareFeetMin) {
-            conditions.push(Prisma.sql`p."squareFeetMin" >= ${Number(squareFeetMin)}`);
+            conditions.push(Prisma.sql`p."squareFeet" >= ${Number(squareFeetMin)}`);
         }
 
         if (squareFeetMax) {
-            conditions.push(Prisma.sql`p."squareFeetMax" <= ${Number(squareFeetMax)}`);
+            conditions.push(Prisma.sql`p."squareFeet" <= ${Number(squareFeetMax)}`);
         }
 
         if (propertyType && propertyType !== "any") {
@@ -73,8 +73,6 @@ export async function GET(req: NextRequest) {
         }
 
         if (latitude && longitude) {
-            console.log("In latitude and longitude", latitude, longitude);
-
             const lat = parseFloat(latitude);
             const lng = parseFloat(longitude);
             const radiusInMeters = 1000;
