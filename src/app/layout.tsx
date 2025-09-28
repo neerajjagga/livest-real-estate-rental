@@ -34,6 +34,22 @@ export const metadata: Metadata = {
     "affordable rentals",
     "apartment finder",
   ],
+  openGraph: {
+    title: "Livest – Find Your Next Rental Home Easily",
+    description:
+      "Discover apartments, houses, and properties for rent. Compare prices, find affordable rentals, and connect with landlords easily.",
+    url: "https://livest-real-estate-rental.vercel.app",
+    siteName: "Livest",
+    type: "website",
+    images: [
+      {
+        url: "/livest-landing-opengraph.png",
+        width: 1200,
+        height: 630,
+        alt: "Livest Rental App Preview",
+      },
+    ],
+  },
 };
 
 export default async function RootLayout({

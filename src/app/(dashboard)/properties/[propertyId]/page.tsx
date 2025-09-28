@@ -15,8 +15,8 @@ export async function generateMetadata({ params }: { params: Promise<{ propertyI
     }
 
     return {
-        title: `${property.title} - $${property.pricePerMonth}/month | LivestRental`,
-        description: `${property.description?.slice(0, 160) || `${property.bedrooms} bed, ${property.bathrooms} bath property in ${property.location?.city}, ${property.location?.state}. Available for $${property.pricePerMonth}/month.`}`,
+        title: `${property.name} - $${property.pricePerMonth}/month | LivestRental`,
+        description: `${property.description?.slice(0, 160) || `${property.beds} bed, ${property.baths} bath ${property.propertyType?.toLowerCase()} in ${property.location?.city}, ${property.location?.state}. Available for $${property.pricePerMonth}/month.`}`,
         keywords: [
             "rental property",
             "apartment",
@@ -24,46 +24,26 @@ export async function generateMetadata({ params }: { params: Promise<{ propertyI
             property.propertyType?.toLowerCase(),
             property.location?.city,
             property.location?.state,
-            `${property.bedrooms} bedroom`,
-            `${property.bathrooms} bathroom`,
+            `${property.beds} bedroom`,
+            `${property.baths} bathroom`,
             "real estate",
-            "property rental"
+            "property rental",
         ].filter(Boolean),
         openGraph: {
-            title: `${property.title} - $${property.pricePerMonth}/month`,
-            description: property.description?.slice(0, 200) || `${property.bedrooms} bed, ${property.bathrooms} bath property in ${property.location?.city}, ${property.location?.state}. Available for $${property.pricePerMonth}/month.`,
+            title: `${property.name} - $${property.pricePerMonth}/month`,
+            description: property.description?.slice(0, 200) || `${property.beds} bed, ${property.baths} bath ${property.propertyType?.toLowerCase()} in ${property.location?.city}, ${property.location?.state}. Available for $${property.pricePerMonth}/month. ${property.squareFeet} sq ft.`,
             type: "website",
-            images: property.photos && property.photos.length > 0 ? [
+            images: property.photoUrls && property.photoUrls.length > 0 ? [
                 {
-                    url: property.photos[0],
+                    url: property.photoUrls[0],
                     width: 1200,
                     height: 630,
-                    alt: `${property.title} - Property Image`,
+                    alt: `${property.name} - Property Image`,
                 }
             ] : [],
             locale: "en_US",
-            siteName: "LivestRental",
-        },
-        twitter: {
-            card: "summary_large_image",
-            title: `${property.title} - $${property.pricePerMonth}/month`,
-            description: property.description?.slice(0, 200) || `${property.bedrooms} bed, ${property.bathrooms} bath property in ${property.location?.city}, ${property.location?.state}. Available for $${property.pricePerMonth}/month.`,
-            images: property.photos && property.photos.length > 0 ? [property.photos[0]] : [],
-        },
-        robots: {
-            index: true,
-            follow: true,
-            googleBot: {
-                index: true,
-                follow: true,
-                "max-video-preview": -1,
-                "max-image-preview": "large",
-                "max-snippet": -1,
-            },
-        },
-        alternates: {
-            canonical: `${process.env.NEXT_PUBLIC_BASE_URL}/properties/${propertyId}`,
-        },
+            siteName: "Livest",
+        }
     }
 }
 
