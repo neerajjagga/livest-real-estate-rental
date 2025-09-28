@@ -2,9 +2,12 @@
   "name": "real-estate-rental-app",
   "version": "0.1.0",
   "private": true,
+  "prisma": {
+    "schema": "src/server/db/prisma/schema.prisma"
+  },
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
     "seed:db": "tsx ./src/server/db/seed.ts"
