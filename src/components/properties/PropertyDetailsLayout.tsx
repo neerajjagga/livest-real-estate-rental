@@ -98,7 +98,7 @@ export default function PropertyDetailsLayout({
 }: PropertyDetailsLayoutProps) {
     const { user } = useUser();
     const router = useRouter();
-    
+
     const [showContactDialog, setShowContactDialog] = useState(false);
     const [showApplicationDialog, setShowApplicationDialog] = useState(false);
     const [isSubmittingApplication, setIsSubmittingApplication] = useState(false);
@@ -182,7 +182,7 @@ export default function PropertyDetailsLayout({
                     const errorMessages = result.errors.map((err: any) => err.message).join(', ');
                     toast.error(`Validation error: ${errorMessages}`);
                 } else {
-                    toast.error(result.message || 'Failed to submit application');
+                    toast.error(result.error || 'Failed to submit application');
                 }
                 return;
             }
@@ -197,7 +197,7 @@ export default function PropertyDetailsLayout({
                     message: ''
                 });
             } else {
-                toast.error(result.message || 'Failed to submit application');
+                toast.error(result.error || 'Failed to submit application');
             }
         } catch (error) {
             toast.error('Network error. Please try again.');
@@ -496,13 +496,12 @@ export default function PropertyDetailsLayout({
                                     </div>
                                 </div>
 
-                                <Dialog open={showApplicationDialog} onOpenChange={() => {
-                                    if (!user) {
-                                        setShowApplicationDialog(false);
+                                <Dialog open={showApplicationDialog} onOpenChange={(open) => {
+                                    if (open && !user) {
                                         router.push('/signin');
-                                        return false;
+                                        return;
                                     }
-                                    return true;
+                                    setShowApplicationDialog(open);
                                 }}>
                                     <DialogTrigger asChild>
                                         <Button className="w-full" size="lg">

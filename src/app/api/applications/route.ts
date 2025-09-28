@@ -92,11 +92,11 @@ export async function POST(req: NextRequest) {
         const session = await auth.api.getSession({ headers: await headers() });
 
         if (!session) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+            return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
         }
 
         if (session.user.role !== "Tenant") {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+            return NextResponse.json({ success: false, error: "Manager cannot apply for a property" }, { status: 403 });
         }
 
         const { user } = session;

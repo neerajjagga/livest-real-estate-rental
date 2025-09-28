@@ -32,22 +32,25 @@ export default function LoginForm() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsLoading(true);
-        const response = await signIn.email({
+
+        await signIn.email({
             email: formData.email,
             password: formData.password
         }, {
-            onRequest: () => { },
-            onResponse: () => { },
-            onSuccess: () => { },
-            onError: () => { },
+            onRequest: () => {
+                setIsLoading(true);
+            },
+            onResponse: () => {
+                setIsLoading(false);
+            },
+            onError: (ctx) => {
+                toast.error(ctx.error.message);
+            },
+            onSuccess: (res) => {
+                toast.success("Logged in successfully");
+                router.push("/search");
+            },
         });
-        if (response.error) {
-            toast.error(response.error.message);
-        }
-        setIsLoading(false);
-        toast.success("Logged in successfully");
-        router.push("/search");
     };
 
     const handleGoogleLogin = async () => {

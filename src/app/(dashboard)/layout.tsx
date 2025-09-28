@@ -1,7 +1,7 @@
 import AppSidebar from "@/components/dashboard/AppSidebar";
 import Navbar from "@/components/landing/Navbar";
-import SearchHeader from "@/components/search/SearchHeader";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import SearchPropertyButton from "@/components/dashboard/SearchPropertyButton";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     return (
@@ -15,6 +15,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             {children}
                         </div>
                     </main>
+
+                    <SearchPropertyButton />
                 </div>
             </div>
         </SidebarProvider>
