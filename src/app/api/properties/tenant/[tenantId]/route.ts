@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/server/db/client";
 import { wktToGeoJSON } from "@terraformer/wkt";
 
-export async function GET(_: NextRequest, { params }: { params: { tenantId: string } }) {
-    const { tenantId } = params;
+export async function GET(_: NextRequest, { params }: { params: Promise<{ tenantId: string }> }) {
+    const { tenantId } = await params;
 
     try {
 

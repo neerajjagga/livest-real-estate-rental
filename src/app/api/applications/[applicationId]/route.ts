@@ -4,7 +4,7 @@ import { updateApplicationSchema } from "@/server/validators/schemas";
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function PATCH(req: NextRequest, { params }: { params: { applicationId: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ applicationId: string }> }) {
     try {
         const session = await auth.api.getSession({ headers: await headers() });
 
@@ -29,7 +29,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { applicatio
         }
 
         const { status } = body;
-        const { applicationId } = params;
+        const { applicationId } = await params;
         const { user } = session;
 
         if (!status) {
@@ -137,7 +137,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { applicatio
     }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { applicationId: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ applicationId: string }> }) {
     try {
         const session = await auth.api.getSession({ headers: await headers() });
 
@@ -149,7 +149,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { applicati
             return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
         }
 
-        const { applicationId } = params;
+        const { applicationId } = await params;
         const { user } = session;
 
         const application = await prisma.application.findUnique({

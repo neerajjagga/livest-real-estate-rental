@@ -1,6 +1,6 @@
 import PropertyDetailsLayout from "@/components/properties/PropertyDetailsLayout";
 
-export default async function Property({ params }: { params: { propertyId: string } }) {
+export default async function Property({ params }: { params: Promise<{ propertyId: string }> }) {
     const { propertyId } = await params;
 
     const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/properties/${propertyId}`, {

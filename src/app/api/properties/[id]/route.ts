@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/server/db/client";
 import { wktToGeoJSON } from "@terraformer/wkt";
 
-export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
-    const { id } = params;
+export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
 
     try {
         const property = await prisma.property.findFirst({
