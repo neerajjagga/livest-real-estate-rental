@@ -1,9 +1,8 @@
 import { auth } from "@/lib/auth/server";
 import { prisma } from "@/server/db/client";
-import { applicationSchema, updateApplicationSchema } from "@/server/validators/schemas";
+import { updateApplicationSchema } from "@/server/validators/schemas";
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-import { success } from "zod";
 
 export async function PATCH(req: NextRequest, { params }: { params: { applicationId: string } }) {
     try {
@@ -134,6 +133,60 @@ export async function PATCH(req: NextRequest, { params }: { params: { applicatio
         return NextResponse.json({
             success: false,
             message: err.message || "Error updating application",
+        }, { status: 500 });
+    }
+}
+
+export async function DELETE(req: NextRequest, { params }: { params: { applicationId: string } }) {
+    try {
+        const session = await auth.api.getSession({ headers: await headers() });
+
+        if (!session) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        if (session.user.role !== "Tenant") {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+        }
+
+        const { applicationId } = params;
+        const { user } = session;
+
+        const application = await prisma.application.findUnique({
+            where: {
+                id: applicationId
+            }
+        });
+
+        if (!application) {
+            return NextResponse.json({ success: false, message: "Application not found" }, { status: 404 });
+        }
+
+        if (application.tenantId !== user.id) {
+            return NextResponse.json({ success: false, message: "You can only cancel your own applications" }, { status: 403 });
+        }
+
+        if (application.status !== "Pending") {
+            return NextResponse.json({ 
+                success: false, 
+                message: `Cannot cancel application with status: ${application.status}` 
+            }, { status: 400 });
+        }
+
+        await prisma.application.delete({
+            where: { id: applicationId }
+        });
+
+        return NextResponse.json({
+            success: true,
+            message: "Application cancelled successfully"
+        });
+
+    } catch (err: any) {
+        console.log(err);
+        return NextResponse.json({
+            success: false,
+            message: err.message || "Error cancelling application",
         }, { status: 500 });
     }
 }

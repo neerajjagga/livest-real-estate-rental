@@ -1,27 +1,24 @@
 'use client';
 
 import { usePathname } from "next/navigation";
-// import { useSidebar } from "../ui/sidebar";
-import { UserRole } from "@prisma/client";
-import { Building, FileText, Heart, Home, Settings } from "lucide-react"
+import { Building, FileText, Home, Settings } from "lucide-react"
 import {
     Sidebar,
     SidebarContent,
     SidebarGroup,
     SidebarGroupContent,
-    SidebarGroupLabel,
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { useUser } from "../UserProvider";
 
-interface AppSidebarProps {
-    userType: UserRole
-}
-
-export default function AppSidebar({ userType }: AppSidebarProps) {
+export default function AppSidebar() {
     const pathname = usePathname();
-    // const { toggleSidebar, open } = useSidebar();
+    const { user }= useUser();
+    const userType = user?.role;
+
+    if(!user || !userType) return null;
 
     const navLinks = userType === "Manager" ? [
         {
@@ -40,11 +37,6 @@ export default function AppSidebar({ userType }: AppSidebarProps) {
             href: '/settings'
         }
     ] : [
-        {
-            icon: Heart,
-            label: "Favorites",
-            href: '/tenants/favorites'
-        },
         {
             icon: FileText,
             label: "Applications",

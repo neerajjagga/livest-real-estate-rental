@@ -46,6 +46,8 @@ export default function LoginForm() {
             toast.error(response.error.message);
         }
         setIsLoading(false);
+        toast.success("Logged in successfully");
+        router.push("/search");
     };
 
     const handleGoogleLogin = async () => {
@@ -121,13 +123,6 @@ export default function LoginForm() {
                         <label htmlFor="password" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                             Password
                         </label>
-                        <button
-                            type="button"
-                            className="text-sm text-primary hover:underline"
-                            onClick={() => console.log("Forgot password clicked")}
-                        >
-                            Forgot password?
-                        </button>
                     </div>
                     <Input
                         id="password"

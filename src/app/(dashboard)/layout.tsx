@@ -1,5 +1,6 @@
 import AppSidebar from "@/components/dashboard/AppSidebar";
 import Navbar from "@/components/landing/Navbar";
+import SearchHeader from "@/components/search/SearchHeader";
 import { SidebarProvider } from "@/components/ui/sidebar";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -9,7 +10,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <Navbar />
                 <div className="pt-20 w-full">
                     <main className="flex">
-                        <AppSidebar userType="Tenant" />
+                        <AppSidebar />
                         <div className="flex flex-grow transition-all duration-300">
                             {children}
                         </div>

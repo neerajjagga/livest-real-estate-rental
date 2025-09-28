@@ -1,7 +1,6 @@
 'use client';
 
-import { Heart, Star, Bed, Bath, Square, MapPin, Wifi, Car, Waves } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Star, Bed, Bath, Square, MapPin, Wifi, Car, Waves } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
@@ -19,16 +18,13 @@ interface PropertyCardProps {
     sqft: number;
     image: string;
     amenities: string[];
-    isFavorited?: boolean;
     badges?: string[];
   };
-  onFavoriteToggle?: (id: string) => void;
   onCardClick?: (id: string) => void;
 }
 
 export default function PropertyCard({
   property,
-  onFavoriteToggle,
   onCardClick
 }: PropertyCardProps) {
   const {
@@ -43,14 +39,9 @@ export default function PropertyCard({
     sqft,
     image,
     amenities,
-    isFavorited = false,
     badges = []
   } = property;
 
-  const handleFavoriteClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onFavoriteToggle?.(id);
-  };
 
   const handleCardClick = () => {
     onCardClick?.(id);
@@ -78,23 +69,13 @@ export default function PropertyCard({
       <div className="relative">
         <div className="aspect-[4/3] relative overflow-hidden">
           <Image
-            src={'/landing-i7.png'}
+            src={image || '/no-photo.jpg'}
             alt={title}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-300"
           />
         </div>
 
-        <Button
-          variant="ghost"
-          size="sm"
-          className="absolute top-2 right-2 h-8 w-8 p-0 bg-white/80 hover:bg-white"
-          onClick={handleFavoriteClick}
-        >
-          <Heart
-            className={`h-4 w-4 ${isFavorited ? 'fill-red-500 text-red-500' : 'text-gray-600'}`}
-          />
-        </Button>
 
         {badges.length > 0 && (
           <div className="absolute top-2 left-2 flex flex-col gap-1">

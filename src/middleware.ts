@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "./lib/auth/server";
 import { headers } from "next/headers";
 
-const protectedRoutes = ['/dashboard'];
+const protectedRoutes = ['/dashboard', '/managers', '/tenants'];
 
 export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;

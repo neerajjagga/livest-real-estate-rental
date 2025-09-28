@@ -132,7 +132,6 @@ export default function SearchFilters({ isOpen = true, onClose }: SearchFiltersP
         }
       } catch (err) {
         if ((err as any)?.name !== 'AbortError') {
-          console.warn('Search fetch failed:', err);
         }
       }
     }, 300);

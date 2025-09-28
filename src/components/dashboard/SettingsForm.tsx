@@ -55,7 +55,6 @@ export default function SettingsForm() {
             toast.success('Profile updated successfully');
             refetchUser();
         } catch (err) {
-            console.error("Error updating user:", err);
             toast.error("Something went wrong. Please try again.");
         } finally {
             setIsLoading(false);

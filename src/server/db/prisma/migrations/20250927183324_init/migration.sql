@@ -97,7 +97,6 @@ CREATE TABLE "public"."property" (
     "numberOfReviews" INTEGER DEFAULT 0,
     "locationId" TEXT NOT NULL,
     "managerId" TEXT NOT NULL,
-    "tenants" TEXT[],
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -168,6 +167,14 @@ CREATE TABLE "public"."payment" (
 );
 
 -- CreateTable
+CREATE TABLE "public"."_TenantProperties" (
+    "A" TEXT NOT NULL,
+    "B" TEXT NOT NULL,
+
+    CONSTRAINT "_TenantProperties_AB_pkey" PRIMARY KEY ("A","B")
+);
+
+-- CreateTable
 CREATE TABLE "public"."_TenantFavorites" (
     "A" TEXT NOT NULL,
     "B" TEXT NOT NULL,
@@ -183,6 +190,9 @@ CREATE UNIQUE INDEX "session_token_key" ON "public"."session"("token");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "application_leaseId_key" ON "public"."application"("leaseId");
+
+-- CreateIndex
+CREATE INDEX "_TenantProperties_B_index" ON "public"."_TenantProperties"("B");
 
 -- CreateIndex
 CREATE INDEX "_TenantFavorites_B_index" ON "public"."_TenantFavorites"("B");
@@ -216,6 +226,12 @@ ALTER TABLE "public"."application" ADD CONSTRAINT "application_leaseId_fkey" FOR
 
 -- AddForeignKey
 ALTER TABLE "public"."payment" ADD CONSTRAINT "payment_leaseId_fkey" FOREIGN KEY ("leaseId") REFERENCES "public"."lease"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."_TenantProperties" ADD CONSTRAINT "_TenantProperties_A_fkey" FOREIGN KEY ("A") REFERENCES "public"."property"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."_TenantProperties" ADD CONSTRAINT "_TenantProperties_B_fkey" FOREIGN KEY ("B") REFERENCES "public"."user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."_TenantFavorites" ADD CONSTRAINT "_TenantFavorites_A_fkey" FOREIGN KEY ("A") REFERENCES "public"."property"("id") ON DELETE CASCADE ON UPDATE CASCADE;

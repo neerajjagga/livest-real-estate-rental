@@ -71,7 +71,7 @@ export default function RegisterForm() {
             },
             onSuccess: (res) => {
                 toast.success("Account created successfully");
-                router.push("/dashboard");
+                router.push("/search");
             },
         });
     };

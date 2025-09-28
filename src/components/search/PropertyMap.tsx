@@ -93,7 +93,6 @@ export default function PropertyMap({
         setUserLocation(newUserLocation);
         setLocationError(null);
       } catch (error) {
-        console.warn('Failed to get user location:', error);
         let errorMessage = 'Failed to get location';
         if (error instanceof GeolocationPositionError) {
           switch (error.code) {

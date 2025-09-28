@@ -19,7 +19,7 @@ export default function ProfileDropdown() {
   const { user } = useUser();
   if (!user) return;
 
-  const profileMenu = user.role === 'Tenant' ? [{ label: 'Favorites', href: '/tenants/favorites' }, { label: "Applications", href: '/tenants/applications' }, { label: "Residences", href: '/tenants/residences' }] : [{ label: 'Properties', href: '/managers/properties' },];
+  const profileMenu = user.role === 'Tenant' ? [{ label: "Applications", href: '/tenants/applications' }, { label: "Residences", href: '/tenants/residences' }] : [{ label: 'Properties', href: '/managers/properties' },];
 
   return (
     <DropdownMenu>
@@ -33,10 +33,10 @@ export default function ProfileDropdown() {
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={() => router.push('/settings')}>
             Profile
           </DropdownMenuItem>
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={() => router.push('/settings')}>
             Settings
           </DropdownMenuItem>
         </DropdownMenuGroup>

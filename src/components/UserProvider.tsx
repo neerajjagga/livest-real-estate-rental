@@ -6,13 +6,14 @@ import { useSession } from "@/lib/auth/client";
 
 interface UserContextType {
     user: AuthUser | null;
+    isLoading: boolean;
     refetchUser: () => void;
 }
 
 const UserContext = createContext<UserContextType | null>(null);
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
-    const { data: session, refetch } = useSession();
+    const { data: session, refetch, isPending } = useSession();
     const [user, setUser] = useState<AuthUser | null>(session?.user || null);
 
     useEffect(() => {
@@ -20,7 +21,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     }, [session]);
 
     return (
-        <UserContext.Provider value={{ user, refetchUser: refetch }}>
+        <UserContext.Provider value={{ user, isLoading: isPending, refetchUser: refetch }}>
             {children}
         </UserContext.Provider>
     )
