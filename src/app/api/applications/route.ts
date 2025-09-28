@@ -50,7 +50,7 @@ export async function GET() {
         }
 
         const formattedApplications = await Promise.all(
-            applications.map(async (app) => {
+            applications.map(async (app: typeof applications[0]) => {
                 const lease = await prisma.lease.findFirst({
                     where: {
                         tenantId: app.tenantId,
