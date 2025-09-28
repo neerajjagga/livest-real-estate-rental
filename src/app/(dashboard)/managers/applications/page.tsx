@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -8,12 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import {
-    Building2,
     MapPin,
     Calendar,
-    DollarSign,
     FileText,
-    X,
     Eye,
     Phone,
     Mail,
@@ -21,7 +17,10 @@ import {
     Clock,
     CheckCircle,
     XCircle,
-    AlertCircle
+    AlertCircle,
+    Check,
+    X,
+    MessageSquare
 } from 'lucide-react';
 import Image from 'next/image';
 import { toast } from 'sonner';
@@ -93,12 +92,13 @@ const getStatusIcon = (status: string) => {
     }
 };
 
-export default function Applications() {
+export default function ManagerApplications() {
     const [applications, setApplications] = useState<Application[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [cancellingId, setCancellingId] = useState<string | null>(null);
+    const [processingId, setProcessingId] = useState<string | null>(null);
     const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
+    const [actionType, setActionType] = useState<'approve' | 'deny' | null>(null);
 
     const fetchApplications = async () => {
         try {
@@ -118,6 +118,7 @@ export default function Applications() {
                 throw new Error(data.message || 'Failed to fetch applications');
             }
         } catch (err: any) {
+            console.error('Error fetching applications:', err);
             setError(err.message);
             toast.error('Failed to load applications');
         } finally {
@@ -125,37 +126,55 @@ export default function Applications() {
         }
     };
 
-    const handleCancelApplication = async (applicationId: string) => {
+    const handleApplicationAction = async (applicationId: string, status: 'Approved' | 'Denied') => {
         try {
-            setCancellingId(applicationId);
+            setProcessingId(applicationId);
 
             const response = await fetch(`/api/applications/${applicationId}`, {
-                method: 'DELETE',
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ status }),
             });
 
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.message || 'Failed to cancel application');
+                throw new Error(data.message || `Failed to ${status.toLowerCase()} application`);
             }
 
             if (data.success) {
-                toast.success('Application cancelled successfully');
-                // Remove the cancelled application from the list
-                setApplications(prev => prev.filter(app => app.id !== applicationId));
+                toast.success(`Application ${status.toLowerCase()} successfully`);
+                setApplications(prev =>
+                    prev.map(app =>
+                        app.id === applicationId
+                            ? { ...app, status: status }
+                            : app
+                    )
+                );
             } else {
-                throw new Error(data.message || 'Failed to cancel application');
+                throw new Error(data.message || `Failed to ${status.toLowerCase()} application`);
             }
         } catch (err: any) {
-            toast.error(err.message || 'Failed to cancel application');
+            console.error(`Error ${status.toLowerCase()} application:`, err);
+            toast.error(err.message || `Failed to ${status.toLowerCase()} application`);
         } finally {
-            setCancellingId(null);
+            setProcessingId(null);
+            setActionType(null);
         }
     };
 
     useEffect(() => {
         fetchApplications();
     }, []);
+
+    const stats = {
+        total: applications.length,
+        pending: applications.filter(app => app.status === 'Pending').length,
+        approved: applications.filter(app => app.status === 'Approved').length,
+        denied: applications.filter(app => app.status === 'Denied').length,
+    };
 
     if (loading) {
         return (
@@ -165,6 +184,17 @@ export default function Applications() {
                         <Skeleton className="h-8 w-48 mb-2" />
                         <Skeleton className="h-4 w-64" />
                     </div>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                    {[1, 2, 3, 4].map((i) => (
+                        <Card key={i}>
+                            <CardContent className="p-6">
+                                <Skeleton className="h-4 w-20 mb-2" />
+                                <Skeleton className="h-8 w-12" />
+                            </CardContent>
+                        </Card>
+                    ))}
                 </div>
 
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -208,13 +238,56 @@ export default function Applications() {
         <div className="container mx-auto p-6 space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">My Applications</h1>
-                    <p className="text-gray-600">Track and manage your rental applications</p>
+                    <h1 className="text-3xl font-bold text-gray-900">Property Applications</h1>
+                    <p className="text-gray-600">Review and manage rental applications for your properties</p>
                 </div>
-                <div className="text-right">
-                    <p className="text-sm text-gray-500">Total Applications</p>
-                    <p className="text-2xl font-bold text-gray-900">{applications.length}</p>
-                </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <Card>
+                    <CardContent className="p-6">
+                        <div className="flex items-center">
+                            <FileText className="h-8 w-8 text-blue-600" />
+                            <div className="ml-4">
+                                <p className="text-sm font-medium text-gray-600">Total Applications</p>
+                                <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardContent className="p-6">
+                        <div className="flex items-center">
+                            <Clock className="h-8 w-8 text-yellow-600" />
+                            <div className="ml-4">
+                                <p className="text-sm font-medium text-gray-600">Pending Review</p>
+                                <p className="text-2xl font-bold text-gray-900">{stats.pending}</p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardContent className="p-6">
+                        <div className="flex items-center">
+                            <CheckCircle className="h-8 w-8 text-green-600" />
+                            <div className="ml-4">
+                                <p className="text-sm font-medium text-gray-600">Approved</p>
+                                <p className="text-2xl font-bold text-gray-900">{stats.approved}</p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardContent className="p-6">
+                        <div className="flex items-center">
+                            <XCircle className="h-8 w-8 text-red-600" />
+                            <div className="ml-4">
+                                <p className="text-sm font-medium text-gray-600">Denied</p>
+                                <p className="text-2xl font-bold text-gray-900">{stats.denied}</p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
 
             {applications.length === 0 ? (
@@ -223,11 +296,8 @@ export default function Applications() {
                         <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                         <h3 className="text-lg font-semibold text-gray-900 mb-2">No Applications Yet</h3>
                         <p className="text-gray-600 mb-4">
-                            You haven't submitted any rental applications yet. Start browsing properties to find your next home!
+                            You haven't received any rental applications for your properties yet.
                         </p>
-                        <Button asChild>
-                            <a href="/search">Browse Properties</a>
-                        </Button>
                     </CardContent>
                 </Card>
             ) : (
@@ -258,18 +328,18 @@ export default function Applications() {
                             </CardHeader>
 
                             <CardContent className="space-y-4">
-                                <div className="grid grid-cols-3 gap-2 text-sm">
-                                    <div className="text-center">
-                                        <p className="font-medium">{application.property.beds}</p>
-                                        <p className="text-gray-500">Beds</p>
+                                <div className="space-y-2">
+                                    <div className="flex items-center text-sm">
+                                        <User className="w-4 h-4 mr-2 text-gray-500" />
+                                        <span className="font-medium">{application.name}</span>
                                     </div>
-                                    <div className="text-center">
-                                        <p className="font-medium">{application.property.baths}</p>
-                                        <p className="text-gray-500">Baths</p>
+                                    <div className="flex items-center text-sm text-gray-600">
+                                        <Mail className="w-4 h-4 mr-2 text-gray-500" />
+                                        <span>{application.email}</span>
                                     </div>
-                                    <div className="text-center">
-                                        <p className="font-medium">{application.property.squareFeet}</p>
-                                        <p className="text-gray-500">Sq Ft</p>
+                                    <div className="flex items-center text-sm text-gray-600">
+                                        <Phone className="w-4 h-4 mr-2 text-gray-500" />
+                                        <span>{application.phoneNumber}</span>
                                     </div>
                                 </div>
 
@@ -282,32 +352,36 @@ export default function Applications() {
                                         <span className="text-gray-600">Rent:</span>
                                         <span className="font-medium">{formatCurrency(application.property.pricePerMonth)}/mo</span>
                                     </div>
-                                    {application.lease && (
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-gray-600">Next Payment:</span>
-                                            <span className="font-medium">{formatDate(application.lease.nextPaymentDate)}</span>
-                                        </div>
-                                    )}
                                 </div>
 
-                                <div className="flex gap-2">
+                                {application.message && (
+                                    <div className="bg-gray-50 p-3 rounded-lg">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <MessageSquare className="w-4 h-4 text-gray-500" />
+                                            <span className="text-sm font-medium text-gray-700">Message:</span>
+                                        </div>
+                                        <p className="text-sm text-gray-600 line-clamp-2">{application.message}</p>
+                                    </div>
+                                )}
+
+                                <div className="space-y-2">
                                     <Dialog>
-                                        {/* <DialogTrigger asChild>
-                                            <Button 
-                                                variant="outline" 
-                                                size="sm" 
-                                                className="flex-1"
+                                        <DialogTrigger asChild>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                className="w-full"
                                                 onClick={() => setSelectedApplication(application)}
                                             >
                                                 <Eye className="w-4 h-4 mr-1" />
                                                 View Details
                                             </Button>
-                                        </DialogTrigger> */}
+                                        </DialogTrigger>
                                         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
                                             <DialogHeader>
                                                 <DialogTitle>Application Details</DialogTitle>
                                                 <DialogDescription>
-                                                    Application for {selectedApplication?.property.name}
+                                                    Application from {selectedApplication?.name} for {selectedApplication?.property.name}
                                                 </DialogDescription>
                                             </DialogHeader>
 
@@ -346,7 +420,7 @@ export default function Applications() {
 
                                                     <div className="grid md:grid-cols-2 gap-6">
                                                         <div className="space-y-3">
-                                                            <h4 className="font-semibold">Application Information</h4>
+                                                            <h4 className="font-semibold">Applicant Information</h4>
                                                             <div className="space-y-2 text-sm">
                                                                 <div className="flex items-center gap-2">
                                                                     <User className="w-4 h-4 text-gray-500" />
@@ -388,30 +462,12 @@ export default function Applications() {
 
                                                     {selectedApplication.message && (
                                                         <div className="space-y-2">
-                                                            <h4 className="font-semibold">Additional Message</h4>
+                                                            <h4 className="font-semibold">Applicant Message</h4>
                                                             <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
                                                                 {selectedApplication.message}
                                                             </p>
                                                         </div>
                                                     )}
-
-                                                    <div className="space-y-3">
-                                                        <h4 className="font-semibold">Property Manager</h4>
-                                                        <div className="bg-gray-50 p-3 rounded-lg space-y-2 text-sm">
-                                                            <div className="flex items-center gap-2">
-                                                                <User className="w-4 h-4 text-gray-500" />
-                                                                <span>{selectedApplication.manager.name}</span>
-                                                            </div>
-                                                            <div className="flex items-center gap-2">
-                                                                <Mail className="w-4 h-4 text-gray-500" />
-                                                                <span>{selectedApplication.manager.email}</span>
-                                                            </div>
-                                                            <div className="flex items-center gap-2">
-                                                                <Phone className="w-4 h-4 text-gray-500" />
-                                                                <span>{selectedApplication.manager.phoneNumber}</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
 
                                                     {selectedApplication.lease && (
                                                         <div className="space-y-3">
@@ -432,44 +488,141 @@ export default function Applications() {
                                                             </div>
                                                         </div>
                                                     )}
+
+                                                    {selectedApplication.status === 'Pending' && (
+                                                        <div className="flex gap-3 pt-4 border-t">
+                                                            <Dialog>
+                                                                <DialogTrigger asChild>
+                                                                    <Button
+                                                                        variant="destructive"
+                                                                        className="flex-1"
+                                                                        onClick={() => setActionType('deny')}
+                                                                        disabled={processingId === selectedApplication.id}
+                                                                    >
+                                                                        <X className="w-4 h-4 mr-1" />
+                                                                        Deny Application
+                                                                    </Button>
+                                                                </DialogTrigger>
+                                                                <DialogContent>
+                                                                    <DialogHeader>
+                                                                        <DialogTitle>Deny Application</DialogTitle>
+                                                                        <DialogDescription>
+                                                                            Are you sure you want to deny the application from {selectedApplication.name} for {selectedApplication.property.name}?
+                                                                        </DialogDescription>
+                                                                    </DialogHeader>
+                                                                    <DialogFooter>
+                                                                        <Button variant="outline" onClick={() => setActionType(null)}>Cancel</Button>
+                                                                        <Button
+                                                                            variant="destructive"
+                                                                            onClick={() => handleApplicationAction(selectedApplication.id, 'Denied')}
+                                                                            disabled={processingId === selectedApplication.id}
+                                                                        >
+                                                                            {processingId === selectedApplication.id ? 'Processing...' : 'Deny Application'}
+                                                                        </Button>
+                                                                    </DialogFooter>
+                                                                </DialogContent>
+                                                            </Dialog>
+
+                                                            <Dialog>
+                                                                <DialogTrigger asChild>
+                                                                    <Button
+                                                                        className="flex-1"
+                                                                        onClick={() => setActionType('approve')}
+                                                                        disabled={processingId === selectedApplication.id}
+                                                                    >
+                                                                        <Check className="w-4 h-4 mr-1" />
+                                                                        Approve Application
+                                                                    </Button>
+                                                                </DialogTrigger>
+                                                                <DialogContent>
+                                                                    <DialogHeader>
+                                                                        <DialogTitle>Approve Application</DialogTitle>
+                                                                        <DialogDescription>
+                                                                            Are you sure you want to approve the application from {selectedApplication.name} for {selectedApplication.property.name}? This will create a lease agreement.
+                                                                        </DialogDescription>
+                                                                    </DialogHeader>
+                                                                    <DialogFooter>
+                                                                        <Button variant="outline" onClick={() => setActionType(null)}>Cancel</Button>
+                                                                        <Button
+                                                                            onClick={() => handleApplicationAction(selectedApplication.id, 'Approved')}
+                                                                            disabled={processingId === selectedApplication.id}
+                                                                        >
+                                                                            {processingId === selectedApplication.id ? 'Processing...' : 'Approve Application'}
+                                                                        </Button>
+                                                                    </DialogFooter>
+                                                                </DialogContent>
+                                                            </Dialog>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             )}
                                         </DialogContent>
                                     </Dialog>
 
                                     {application.status === 'Pending' && (
-                                        <Dialog>
-                                            <DialogTrigger asChild>
-                                                <Button
-                                                    variant="destructive"
-                                                    size="sm"
-                                                    disabled={cancellingId === application.id}
-                                                    className='w-full'
-                                                >
-                                                    <X className="w-4 h-4 mr-1" />
-                                                    {cancellingId === application.id ? 'Cancelling...' : 'Cancel'}
-                                                </Button>
-                                            </DialogTrigger>
-                                            <DialogContent>
-                                                <DialogHeader>
-                                                    <DialogTitle>Cancel Application</DialogTitle>
-                                                    <DialogDescription>
-                                                        Are you sure you want to cancel your application for {application.property.name}?
-                                                        This action cannot be undone.
-                                                    </DialogDescription>
-                                                </DialogHeader>
-                                                <DialogFooter>
-                                                    <Button variant="outline">Keep Application</Button>
+                                        <div className="flex gap-2">
+                                            <Dialog>
+                                                <DialogTrigger asChild>
                                                     <Button
                                                         variant="destructive"
-                                                        onClick={() => handleCancelApplication(application.id)}
-                                                        disabled={cancellingId === application.id}
+                                                        size="sm"
+                                                        className="flex-1"
+                                                        disabled={processingId === application.id}
                                                     >
-                                                        {cancellingId === application.id ? 'Cancelling...' : 'Yes, Cancel Application'}
+                                                        <X className="w-4 h-4 mr-1" />
+                                                        Deny
                                                     </Button>
-                                                </DialogFooter>
-                                            </DialogContent>
-                                        </Dialog>
+                                                </DialogTrigger>
+                                                <DialogContent>
+                                                    <DialogHeader>
+                                                        <DialogTitle>Deny Application</DialogTitle>
+                                                        <DialogDescription>
+                                                            Are you sure you want to deny the application from {application.name}?
+                                                        </DialogDescription>
+                                                    </DialogHeader>
+                                                    <DialogFooter>
+                                                        <Button variant="outline">Cancel</Button>
+                                                        <Button
+                                                            variant="destructive"
+                                                            onClick={() => handleApplicationAction(application.id, 'Denied')}
+                                                            disabled={processingId === application.id}
+                                                        >
+                                                            {processingId === application.id ? 'Processing...' : 'Deny Application'}
+                                                        </Button>
+                                                    </DialogFooter>
+                                                </DialogContent>
+                                            </Dialog>
+
+                                            <Dialog>
+                                                <DialogTrigger asChild>
+                                                    <Button
+                                                        size="sm"
+                                                        className="flex-1"
+                                                        disabled={processingId === application.id}
+                                                    >
+                                                        <Check className="w-4 h-4 mr-1" />
+                                                        Approve
+                                                    </Button>
+                                                </DialogTrigger>
+                                                <DialogContent>
+                                                    <DialogHeader>
+                                                        <DialogTitle>Approve Application</DialogTitle>
+                                                        <DialogDescription>
+                                                            Are you sure you want to approve the application from {application.name}? This will create a lease agreement.
+                                                        </DialogDescription>
+                                                    </DialogHeader>
+                                                    <DialogFooter>
+                                                        <Button variant="outline">Cancel</Button>
+                                                        <Button
+                                                            onClick={() => handleApplicationAction(application.id, 'Approved')}
+                                                            disabled={processingId === application.id}
+                                                        >
+                                                            {processingId === application.id ? 'Processing...' : 'Approve Application'}
+                                                        </Button>
+                                                    </DialogFooter>
+                                                </DialogContent>
+                                            </Dialog>
+                                        </div>
                                     )}
                                 </div>
                             </CardContent>

@@ -21,7 +21,6 @@ interface Property_Legacy {
   sqft: number;
   image: string;
   amenities: string[];
-  isFavorited?: boolean;
   badges?: string[];
   lat: number;
   lng: number;
@@ -36,7 +35,6 @@ export default function SearchLayout() {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showMap, setShowMap] = useState(true);
-  const [selectedProperty, setSelectedProperty] = useState<string | null>(null);
   const [isLoadingProperties, setIsLoadingProperties] = useState<boolean>(true);
 
   useEffect(() => {
@@ -68,17 +66,6 @@ export default function SearchLayout() {
     setIsFiltersOpen(false);
   };
 
-  const handlePropertySelect = (propertyId: string) => {
-    setSelectedProperty(propertyId);
-  };
-
-  const handleFavoriteToggle = (propertyId: string) => {
-    console.log('Toggled favorite for property:', propertyId);
-  };
-
-  const handlePropertyClick = (propertyId: string) => {
-    console.log('Clicked property:', propertyId);
-  };
 
   const convertToMapMarkers = (properties: PropertyListing[]): PropertyMapMarker[] => {
     return properties.map(property => ({
@@ -101,12 +88,10 @@ export default function SearchLayout() {
       beds: property.beds,
       baths: property.baths,
       sqft: property.squareFeet,
-      image: property.photoUrls[0] || '/api/placeholder/400/300',
+      image: property.photoUrls?.[0] || '/no-photo.jpg',
       amenities: property.amenities.map(amenity => amenity.toString()),
       lat: property.location.coordinates.latitude,
       lng: property.location.coordinates.longitude,
-      // isFavorited: property.isFavorited,
-      // badges: property.badges
     }));
   };
 
@@ -143,8 +128,6 @@ export default function SearchLayout() {
               properties={convertToLegacyFormat(propertyListings)}
               viewMode={viewMode}
               onViewModeChange={setViewMode}
-              onFavoriteToggle={handleFavoriteToggle}
-              onPropertyClick={handlePropertyClick}
               isLoadingProperties={isLoadingProperties}
             />
           </div>
@@ -153,7 +136,6 @@ export default function SearchLayout() {
             <div className="hidden lg:block lg:w-1/2 border-l border-gray-200">
               <PropertyMap
                 properties={convertToMapMarkers(propertyListings)}
-                onPropertySelect={handlePropertySelect}
                 className="w-full h-full"
               />
             </div>
@@ -181,7 +163,6 @@ export default function SearchLayout() {
               </div>
               <PropertyMap
                 properties={convertToMapMarkers(propertyListings)}
-                onPropertySelect={handlePropertySelect}
                 className="w-full h-[calc(100%-60px)]"
               />
             </div>

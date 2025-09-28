@@ -18,7 +18,7 @@ export async function GET() {
 
         if (user.role === "Tenant") {
             whereClause = {
-                id: user.id
+                tenantId: user.id
             }
         } else if (user.role === "Manager") {
             whereClause = {
@@ -131,51 +131,45 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ success: false, message: "Property not found" }, { status: 404 });
         }
 
-        const newApplication = await prisma.$transaction(async (prisma) => {
-            const lease = await prisma.lease.create({
-                data: {
-                    startDate: new Date(),
-                    endDate: new Date(
-                        new Date().setFullYear(new Date().getFullYear() + 1)
-                    ),
-                    rent: property.pricePerMonth,
-                    deposit: property.securityDeposit,
-                    property: {
-                        connect: { id: propertyId }
-                    },
-                    tenant: {
-                        connect: { id: user.id }
-                    }
-                }
-            });
+        const existingApplication = await prisma.application.findFirst({
+            where: {
+                tenantId: user.id,
+                propertyId: propertyId,
+                status: "Pending"
+            }
+        });
 
+        if (existingApplication) {
+            return NextResponse.json({ 
+                success: false, 
+                message: "You already have a pending application for this property" 
+            }, { status: 400 });
+        }
 
-            const application = await prisma.application.create({
-                data: {
-                    applicationDate: new Date(applicationDate),
-                    name,
-                    email,
-                    phoneNumber,
-                    message,
-                    property: {
-                        connect: { id: propertyId }
-                    },
-                    tenant: {
-                        connect: { id: user.id }
-                    },
-                    lease: {
-                        connect: { id: lease.id }
-                    },
-                    status: "Pending",
+        const newApplication = await prisma.application.create({
+            data: {
+                applicationDate: new Date(applicationDate),
+                name,
+                email,
+                phoneNumber,
+                message,
+                property: {
+                    connect: { id: propertyId }
                 },
-                include: {
-                    property: true,
-                    tenant: true,
-                    lease: true,
-                }
-            })
-
-            return application
+                tenant: {
+                    connect: { id: user.id }
+                },
+                status: "Pending",
+            },
+            include: {
+                property: {
+                    include: {
+                        location: true,
+                        manager: true,
+                    }
+                },
+                tenant: true,
+            }
         });
 
         return NextResponse.json({

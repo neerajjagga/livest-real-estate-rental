@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
 import { Grid3X3, List, Loader } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PropertyCard from './PropertyCard';
+import Link from 'next/link';
 
 interface Property {
   id: string;
@@ -17,13 +17,11 @@ interface Property {
   sqft: number;
   image: string;
   amenities: string[];
-  isFavorited?: boolean;
   badges?: string[];
 }
 
 interface PropertyListProps {
   properties: Property[];
-  onFavoriteToggle?: (id: string) => void;
   onPropertyClick?: (id: string) => void;
   viewMode?: 'grid' | 'list';
   onViewModeChange?: (mode: 'grid' | 'list') => void;
@@ -32,26 +30,11 @@ interface PropertyListProps {
 
 export default function PropertyList({
   properties,
-  onFavoriteToggle,
   onPropertyClick,
   viewMode = 'grid',
   onViewModeChange,
   isLoadingProperties
 }: PropertyListProps) {
-  const [favorites, setFavorites] = useState<Set<string>>(new Set());
-
-  const handleFavoriteToggle = (propertyId: string) => {
-    setFavorites(prev => {
-      const newFavorites = new Set(prev);
-      if (newFavorites.has(propertyId)) {
-        newFavorites.delete(propertyId);
-      } else {
-        newFavorites.add(propertyId);
-      }
-      return newFavorites;
-    });
-    onFavoriteToggle?.(propertyId);
-  };
 
   return (
     <div className="flex-1 p-4">
@@ -85,15 +68,13 @@ export default function PropertyList({
       {viewMode === 'grid' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {properties.map((property) => (
-            <PropertyCard
-              key={property.id}
-              property={{
-                ...property,
-                isFavorited: favorites.has(property.id)
-              }}
-              onFavoriteToggle={handleFavoriteToggle}
-              onCardClick={onPropertyClick}
-            />
+            <Link key={property.id} href={`/properties/${property.id}`}>
+              <PropertyCard
+                key={property.id}
+                property={property}
+                onCardClick={onPropertyClick}
+              />
+            </Link>
           ))}
         </div>
       ) : (
@@ -113,15 +94,6 @@ export default function PropertyList({
                     <h3 className="font-semibold text-lg">{property.title}</h3>
                     <p className="text-gray-600">{property.address}</p>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleFavoriteToggle(property.id)}
-                  >
-                    <span className={favorites.has(property.id) ? 'text-red-500' : 'text-gray-400'}>
-                      ♥
-                    </span>
-                  </Button>
                 </div>
                 <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
                   <span>{property.beds} bed</span>

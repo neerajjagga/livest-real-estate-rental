@@ -6,7 +6,8 @@ import Link from "next/link";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useRouter } from "next/navigation";
-import { signOut, useSession } from "@/lib/auth/client";
+import { signOut } from "@/lib/auth/client";
+import { useUser } from "../UserProvider";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import ProfileDropdown from "../landing/ProfileDropdown";
@@ -17,9 +18,9 @@ interface SearchHeaderProps {
 
 export default function SearchHeader({ onMenuToggle }: SearchHeaderProps) {
   const router = useRouter();
-  const { data: session, isPending } = useSession();
+  const { user, isLoading } = useUser();
 
-  if (isPending) {
+  if (isLoading) {
     return (
       <header className="bg-white border-b border-gray-200 px-4 py-3 sticky top-0 z-50">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
@@ -108,7 +109,7 @@ export default function SearchHeader({ onMenuToggle }: SearchHeaderProps) {
         </div>
 
         <div className="flex items-center gap-3">
-          {!session?.user ? (
+          {!user ? (
             <div className="flex items-center gap-2 md:gap-3">
               <Button
                 variant='outline'
@@ -129,13 +130,13 @@ export default function SearchHeader({ onMenuToggle }: SearchHeaderProps) {
             <>
               <div className="hidden md:flex items-center gap-5">
                 <ProfileDropdown />
-                {session.user.role === 'Manager' && (
+                {user.role === 'Manager' && (
                   <Button
                     variant="ghost"
                     className="text-black hover:text-black/90 hover:bg-gray-100"
-                    onClick={() => router.push('/dashboard/listings')}
+                    onClick={() => router.push('/managers/properties')}
                   >
-                    My Listings
+                    My Properties
                   </Button>
                 )}
                 <Button
@@ -162,15 +163,15 @@ export default function SearchHeader({ onMenuToggle }: SearchHeaderProps) {
                       <div className="flex items-center gap-3 px-2">
                         <div className="h-10 w-10 rounded-full bg-primary/50 flex items-center justify-center">
                           <span className="text-white font-medium text-lg">
-                            {session.user.name?.[0]?.toUpperCase() || "U"}
+                            {user.name?.[0]?.toUpperCase() || "U"}
                           </span>
                         </div>
                         <div className="flex flex-col">
                           <span className="text-black font-medium">
-                            {session.user.name}
+                            {user.name}
                           </span>
                           <span className="text-gray-600 text-sm">
-                            {session.user.email}
+                            {user.email}
                           </span>
                         </div>
                       </div>
@@ -184,13 +185,13 @@ export default function SearchHeader({ onMenuToggle }: SearchHeaderProps) {
                           Dashboard
                         </Button>
 
-                        {session.user.role === 'Manager' && (
+                        {user.role === 'Manager' && (
                           <Button
                             variant="ghost"
                             className="w-full justify-start text-black hover:text-black/90 hover:bg-gray-100"
                             onClick={() => router.push('/dashboard/listings')}
                           >
-                            My Listings
+                            My Properties
                           </Button>
                         )}
 

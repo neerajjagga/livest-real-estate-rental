@@ -110,10 +110,8 @@ export const PropertyTypeIcons: Record<PropertyTypeEnum, LucideIcon> = {
   Cottage: Trees,
 };
 
-// Add this constant at the end of the file
-export const NAVBAR_HEIGHT = 52; // in pixels
+export const NAVBAR_HEIGHT = 52;
 
-// Test users for development
 export const testUsers = {
   tenant: {
     username: "Carol White",

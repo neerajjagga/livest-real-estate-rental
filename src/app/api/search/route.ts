@@ -6,8 +6,6 @@ export async function GET(req: NextRequest) {
     try {
         const searchParams = req.nextUrl.searchParams;
 
-        // TODO: later add filter for favoriteIds
-        const favoriteIds = searchParams.getAll('favoriteIds');
         const priceMin = searchParams.get('priceMin');
         const priceMax = searchParams.get('priceMax');
         const beds = searchParams.get('beds');
@@ -75,7 +73,7 @@ export async function GET(req: NextRequest) {
         if (latitude && longitude) {
             const lat = parseFloat(latitude);
             const lng = parseFloat(longitude);
-            const radiusInMeters = 1000;
+            const radiusInMeters = 10000;
 
             conditions.push(
                 Prisma.sql`ST_DWithin(
