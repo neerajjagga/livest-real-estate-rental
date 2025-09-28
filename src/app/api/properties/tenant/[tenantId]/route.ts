@@ -52,7 +52,7 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ tenant
         }
 
         const propertiesWithFormattedLocation = await Promise.all(
-            properties.map(async (property) => {
+            properties.map(async (property: typeof properties[0]) => {
                 const coordinates: { coordinates: string }[] =
                     await prisma.$queryRaw`SELECT ST_asText(coordinates) as coordinates FROM location WHERE id = ${property.location.id}`
 

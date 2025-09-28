@@ -7,7 +7,7 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ manage
 
     try {
 
-        if(!managerId)  {
+        if (!managerId) {
             return NextResponse.json({ success: false, message: "Manager Id is required" }, { status: 400 });
         }
 
@@ -42,7 +42,7 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ manage
         }
 
         const propertiesWithFormattedLocation = await Promise.all(
-            properties.map(async (property) => {
+            properties.map(async (property: typeof properties[0]) => {
                 const coordinates: { coordinates: string }[] =
                     await prisma.$queryRaw`SELECT ST_asText(coordinates) as coordinates FROM location WHERE id = ${property.location.id}`
 
@@ -50,8 +50,8 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ manage
                 const longitude = geoJSON.coordinates[0];
                 const latitude = geoJSON.coordinates[1];
 
-                return { 
-                    ...property, 
+                return {
+                    ...property,
                     location: {
                         ...property.location,
                         coordinates: {
