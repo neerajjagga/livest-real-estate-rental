@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/livest-landing-opengraph.png",
+        url: "https://livest-real-estate-rental.vercel.app/livest-landing-opengraph.png",
         width: 1200,
         height: 630,
         alt: "Livest Rental App Preview",
